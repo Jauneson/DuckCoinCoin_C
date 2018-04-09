@@ -1,5 +1,6 @@
 #ifndef __BLOCK_H__
 #define __BLOCK_H__
+#include <stdbool.h>
 #include "transactionTree.h"
 
 /**
@@ -21,6 +22,8 @@ Block create_block(TransactionTree transactionTree,int idBlock, char *hash) ;
  * @param block [description]
  * @return hash (type char *)
  */
+bool block_empty(Block block);
+
 char *get_hash(Block block) ;
 /**
  * @return timestamp of a block
