@@ -92,19 +92,22 @@ void set_hashPrev(Block block, char * newHashPrev){
 	minage(block) ;
 }
 */
+bool block_empty(Block block){
+	return (block->size == 0);
+}
 
 char *get_hash(Block block){
-	assert(!empty(block));
+	assert(!block_empty(block));
 	return block->hashCour;
 }
 
 time_t get_timeStamp(Block block){
-	assert(!empty(block));
+	assert(!block_empty(block));
 	return block->timeStamp;
 }
 
 transactionTree get_transaction(Block block){
-	assert(!empty(block));
+	assert(!block_empty(block));
 	return block->transactions;
 }
 
