@@ -87,3 +87,13 @@ void rebuild_Blockchain(Blockchain blockchain, int indexBlock) {
 
 /*----------------------------------------------------------------*/
 	
+
+void delete_Blockchain (Blockchain blockchain){
+	while (nbBlocks != 0){
+		remove_block(blockchain,0);				//remove le premier element de la blockchain
+	}
+	free(blockchain);							//free la blockchain
+}
+
+
+/*-----------------------------------------------------------------*/
