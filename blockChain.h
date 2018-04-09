@@ -63,5 +63,7 @@ void rebuild_Blockchain(Blockchain blockchain, int iBlock) ;
  * @return [description]
  */
 Block get_block(Blockchain blockchain, int numBlock) ;
+
+void delete_Blockchain(Blockchain blockchain) ;
 #endif 
 
