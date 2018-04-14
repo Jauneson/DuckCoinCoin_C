@@ -4,6 +4,7 @@ Par contre je n’ai rien changé dans le .h parce que je ne suis pas en vie ;)
 */
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "sha256_utils.h"
@@ -21,25 +22,23 @@ char * getTimeStamp(){
 /*************************************************/
 
 typedef struct s_transaction {
-    struct s_transaction next ;
-    struct s_transaction prev ;
+    struct s_transaction *next ;
+    struct s_transaction *prev ;
     int index ;
-    char *srcDest ;
+    char srcDest[512] ;
     char hash[SHA256_BLOCK_SIZE*2 + 1] ; // calcul et stockage du hash directement à l'ajout d'une transaction dans la deque
-} *Transaction ;
+}*Transaction;
 
 struct s_transactionDeque {
     struct s_transaction *sentinel ;
     int size ;
-} ;
+};
 
 /****************************************************/
 
-char *create_transaction() {
-    char transaction[30] = "Source-Destination : " ;
-    srand(time(NULL)) ;
-    sprintf(transaction,"%s%d"-,transaction,rand()%MAX_VALUE) ;
-    return transaction ;
+
+void create_transaction(char trans[512]) {
+    sprintf(trans,"Source-Destination : %d",rand()%MAX_VALUE) ;
 }
 
 TransactionDeque init_transaction_deque() {
@@ -54,17 +53,15 @@ TransactionDeque init_transaction_deque() {
 /****************************************************/
 
 
-
 void set_hash_transaction(Transaction  transaction) {
-    char *str = strcat("",transaction->srcDest) ;
-    sha256ofString(str, transaction->hash) ;
+    sha256ofString(transaction->srcDest, transaction->hash) ;
 }
 
 
 void add_transaction_to_transactionDeque(TransactionDeque t){
     Transaction new = malloc(sizeof(struct s_transaction)) ;
     new->index = t->size ;
-    new->srcDest = create_transaction ;
+    create_transaction(new->srcDest) ;
     set_hash_transaction(new);
     new->next = t->sentinel ;
     new->prev = t->sentinel->prev ;
@@ -75,20 +72,24 @@ void add_transaction_to_transactionDeque(TransactionDeque t){
 
 
 void remove_transaction(TransactionDeque t, int index) { 
-    Transaction *itr = t->sentinel->next ;
-    while (--index) {
+    Transaction itr = t->sentinel->next ;
+    while (index--) {
         itr = itr->next ;
     }
     itr->prev->next = itr->next ;
     itr->next->prev = itr->prev ;
     free(itr) ;
+    --(t->size) ;
 }
 
 
 void delete_transaction_deque(TransactionDeque t){
-    while (t->size)
-        remove_transaction(t,0) ;
-    free(t) ;
+   while(t->size!=0){
+    remove_transaction(t,0) ;
+   }
+   free(t->sentinel) ;
+   free(t) ;
+   t=NULL ;
 }
 
 
@@ -97,3 +98,14 @@ int get_index(Transaction transaction) {
 }
 
 
+int main(int argc,char *argv[]) {
+    srand(time(NULL)) ;
+    TransactionDeque t = init_transaction_deque() ;
+    for (int i=0; i<5;i++) 
+        add_transaction_to_transactionDeque(t) ;
+    for(Transaction itr = t->sentinel->next;itr != t->sentinel;itr=itr->next){
+        printf(" Transaction: %s\n Index: %d\n Hash: %s\n",itr->srcDest,get_index(itr),itr->hash) ;
+    }
+    delete_transaction_deque(t) ;
+    return 0 ;
+}

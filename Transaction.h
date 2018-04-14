@@ -5,11 +5,12 @@
 /**
  * @Transaction structure 
  */
+typedef struct s_transaction *Transaction ;
 typedef struct s_transactionDeque *TransactionDeque ;
 /**
  * @ 
  */
-Transaction * create_transaction() ;
+void create_transaction() ;
 /**
  * @brief [brief description]
  * @details [long description]
@@ -38,7 +39,7 @@ void add_transaction_to_transactionDeque(TransactionDeque t) ;
  * 
  * @param transaction [description]
  */
-void remove_transaction(Transaction transaction) ;
+void remove_transaction(TransactionDeque transaction, int index) ;
 /**
  * @brief [brief description]
  * @details [long description]
