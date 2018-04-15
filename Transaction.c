@@ -97,7 +97,21 @@ int get_index(Transaction transaction) {
     return transaction->index ;
 }
 
+int get_nb_total_transactions(TransactionDeque t) {
+    return t->size ;
+}
 
+void hash_Merkle_tree(TransactionDeque t, char hash[]){
+    (void)t ;
+    hash = "" ;
+} 
+
+void display_info(TransactionDeque t){
+    for(Transaction itr = t->sentinel->next;itr != t->sentinel;itr=itr->next){
+        printf(" Transaction: %s\n Index: %d\n Hash: %s\n",itr->srcDest,get_index(itr),itr->hash) ;
+    }
+}
+/*
 int main(int argc,char *argv[]) {
     srand(time(NULL)) ;
     TransactionDeque t = init_transaction_deque() ;
@@ -108,4 +122,6 @@ int main(int argc,char *argv[]) {
     }
     delete_transaction_deque(t) ;
     return 0 ;
+
 }
+*/

@@ -4,6 +4,7 @@
 #define MAX_VALUE 10 
 /**
  * @Transaction structure 
+ * 
  */
 typedef struct s_transaction *Transaction ;
 typedef struct s_transactionDeque *TransactionDeque ;
@@ -56,6 +57,14 @@ void delete_transaction_deque(TransactionDeque t) ;
  */
 int get_index(Transaction transaction) ;
 
+
+char *getTimeStamp(void) ;
+
+int get_nb_total_transactions(TransactionDeque transactions) ;
+
+void hash_Merkle_tree(TransactionDeque transactions, char hash[]) ;
+
+void display_info(TransactionDeque t) ;
 #endif
 
 
