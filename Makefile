@@ -2,7 +2,7 @@
 EXEC=test
 # Begin generic part of the Makefile
 CC=gcc
-CFLAGS= -Wextra -Wall
+CFLAGS= -Wextra -Wall -std=c99
 LDFLAGS=
 SRC= $(wildcard *.c)
 OBJ= $(SRC:.c=.o)
