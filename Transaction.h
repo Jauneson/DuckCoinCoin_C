@@ -2,12 +2,17 @@
 #define __TRANSACTION_H__
 
 #define MAX_VALUE 10 
+
+
+char *getTimeStamp(void) ;
 /**
  * @Transaction structure 
  * 
  */
 typedef struct s_transaction *Transaction ;
 typedef struct s_transactionDeque *TransactionDeque ;
+
+TransactionDeque transaction_genesis() ;
 /**
  * @ 
  */
@@ -56,9 +61,6 @@ void delete_transaction_deque(TransactionDeque t) ;
  * @return [description]
  */
 int get_index(Transaction transaction) ;
-
-
-char *getTimeStamp(void) ;
 
 int get_nb_total_transactions(TransactionDeque transactions) ;
 

@@ -36,6 +36,14 @@ struct s_transactionDeque {
 
 /****************************************************/
 
+TransactionDeque transaction_genesis() {
+   TransactionDeque t = malloc(sizeof(struct s_transactionDeque)) ;
+   t->sentinel = malloc(sizeof(struct s_transaction)) ;
+   sprintf(t->sentinel->srcDest,"genesis") ;
+   t->sentinel->index = 0 ;
+   t->size = 0 ; 
+   return t;
+}
 
 void create_transaction(char trans[512]) {
     sprintf(trans,"Source-Destination : %d",rand()%MAX_VALUE) ;
@@ -73,9 +81,8 @@ void add_transaction_to_transactionDeque(TransactionDeque t){
 
 void remove_transaction(TransactionDeque t, int index) { 
     Transaction itr = t->sentinel->next ;
-    while (index--) {
+    while (index--) 
         itr = itr->next ;
-    }
     itr->prev->next = itr->next ;
     itr->next->prev = itr->prev ;
     free(itr) ;
@@ -84,12 +91,11 @@ void remove_transaction(TransactionDeque t, int index) {
 
 
 void delete_transaction_deque(TransactionDeque t){
-   while(t->size!=0){
-    remove_transaction(t,0) ;
-   }
-   free(t->sentinel) ;
-   free(t) ;
-   t=NULL ;
+    while(t->size) {
+        remove_transaction(t,0) ;
+    }
+    free(t->sentinel) ;
+    free(t) ;
 }
 
 
@@ -102,8 +108,42 @@ int get_nb_total_transactions(TransactionDeque t) {
 }
 
 void hash_Merkle_tree(TransactionDeque t, char hash[]){
-    (void)t ;
+ /*   (void)t ;
     hash = "" ;
+    */
+    char temp[SHA256_BLOCK_SIZE*2 + 1];
+    int taille=t->size ;
+
+    if ( (taille)%2==1 ){
+        taille+=1 ;
+    }
+    char * hashTab[] = malloc((taille/2)*sizeof(char)*(SHA256_BLOCK_SIZE*2 + 1)); // Stocke Nb_transactions/2 Hashs
+   
+    // Si nombre impair, taille>t-size, permet de gérer le dédoublement du dernier hash
+    if (taille>t->size){
+        hashTab[taille/2] = t[taille-1] ;
+        strcat(hashTab[taille/2], hashTab[taille/2]) ;
+        sha256ofString(hashTab[taille/2], hashTab[taille/2]) ;  
+    }
+
+    // Premiere itération en récupérant les hashs via la T_dqueue
+    taille=taille/2 ;
+    for(int i=taille-1; i>0; i--){
+        hashTab[i] = t[2*i] ;
+        strcat(hashTab[i], t[(2*i)+1]) ;
+        sha256ofString(hashTab[i], hashTab[i]) ;  
+    }
+
+    // Itérations avec les hashs obtenus jusqu'a l'obtention d'un hash final
+    while (taille>1) {
+        taille=taille/2 ;
+        for(int i=0; i<taille-1; i++){
+            hashTab[i] = hashTab[2*i] ;
+            strcat(hashTab[i], hashTab[(2*i)+1]) ;
+            sha256ofString(hashTab[i], hashTab[i]) ;  
+        }
+    }
+    hash=hashTab[0];
 } 
 
 void display_info(TransactionDeque t){

@@ -7,7 +7,12 @@
 #include "block.h"
 
 void calcul_hash_block(Block block) {
-	return ;
+	sprintf(block->hashCour, "%d", block->index);
+	block->hashCour = strcat(block->hashCour,block->timestamp);
+	block->hashCour = strcat(block->hashCour,block->hasprev);
+	sprintf(block->hashCour, "%d", block->nbTransaction);
+	block->hashCour = strcat(block->hashCour,block->hashTreeRoot);
+	sprintf(block->hashCour, "%d", block->nonce);
 }
 
 Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA256_BLOCK_SIZE*2 + 1]){
@@ -27,7 +32,7 @@ Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA2
 	block->timeStamp = getTimeStamp() ;	
 	sprintf(block->hashPrev,"%s",hashPrev) ; //<-- block->hashPrev = hash ;
 	block->transactions = transactions ;
-	//block->nbTransaction = get_nb_total_transactions(transactions) ;
+	block->nbTransaction = get_nb_total_transactions(transactions) ;
 	hash_Merkle_tree(transactions,block->hashTreeRoot) ;
 	block->nonce = 0 ;
 	calcul_hash_block(block) ;
@@ -59,23 +64,26 @@ Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA2
 
 
 
-/*
 
-On peut créer une fonction "Minage" et qu'on peut appliquer dans le create et dans set_HashPrev qui fait :
+
+//On peut créer une fonction "Minage" et qu'on peut appliquer dans le create et dans set_HashPrev qui fait :
 void minage(Block block){ 
-	BYTE * tempLine ;
-	block->nonce = 0 ;
-	tempLine =  ; // Fonction qui transforme le block en BYTE 
-	sha256ofString(tempLine,block->hashCour) ; 
-	while !( ((block->hashCour[0])==0) && ((block->hashCour[1])==0) && 
-			((block->hashCour[2])==0) && ((block->hashCour[4])==0) ) {
-
-		tempLine =  ; // Fonction qui transforme le block en BYTE 
-		sha256ofString(tempLine,block->hashCour) ; 
-		++(block->nonce) ;
+	BYTE * tempLine = "";
+	int i=0;
+	calcul_hash_block(block);
+	while (i<difficulty){
+		if (block->hashCour[i] != 0){
+			calcul_hash_block(block);
+			sha256ofString(tempLine,block->hashCour);
+			++(block->nonce);
+			i=0;
+		}
+		else{
+			++i;
+		}
 	}
 }
-
+/*
 // Celui ci sert a changer le hashPrev du précédent block (s'il disparait de la chaine par exemple)
 // Ensuite il recalcule le hashCour via le void minage
 void set_hashPrev(Block block, char * newHashPrev){
@@ -106,6 +114,7 @@ TransactionDeque get_transaction(Block block){
 /*     problème d'uniformité du type transactionTree?		*/ 
 
 void remove_block(Block block) {
+	delete_transaction_deque(block->transactions) ;
 	free(block);
 	block = NULL ;
 }
