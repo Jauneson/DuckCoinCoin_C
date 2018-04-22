@@ -7,12 +7,12 @@
 #include "block.h"
 
 void calcul_hash_block(Block block) {
-	sprintf(block->hashCour, "%d", block->index);
-	block->hashCour = strcat(block->hashCour,block->timestamp);
-	block->hashCour = strcat(block->hashCour,block->hasprev);
-	sprintf(block->hashCour, "%d", block->nbTransaction);
-	block->hashCour = strcat(block->hashCour,block->hashTreeRoot);
-	sprintf(block->hashCour, "%d", block->nonce);
+	sprintf(block->hashCour, "%s%d", block->hashCour, block->index);
+	sprintf(block->hashCour,"%s%s",block->hashCour,block->timeStamp);
+	sprintf(block->hashCour,"%s%s",block->hashCour,block->hashPrev);
+	sprintf(block->hashCour,"%s%d",block->hashCour,block->nbTransaction);
+	sprintf(block->hashCour,"%s%s",block->hashCour,block->hashTreeRoot);
+	sprintf(block->hashCour, "%s%d",block->hashCour, block->nonce);
 }
 
 Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA256_BLOCK_SIZE*2 + 1]){
@@ -67,7 +67,7 @@ Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA2
 
 
 //On peut créer une fonction "Minage" et qu'on peut appliquer dans le create et dans set_HashPrev qui fait :
-void minage(Block block){ 
+void minage(Block block, int difficulty){ 
 	BYTE * tempLine = "";
 	int i=0;
 	calcul_hash_block(block);
