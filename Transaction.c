@@ -6,6 +6,8 @@ Par contre je n’ai rien changé dans le .h parce que je ne suis pas en vie ;)
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <stdbool.h>
 
 #include "sha256_utils.h"
 #include "Transaction.h"
@@ -58,6 +60,10 @@ TransactionDeque init_transaction_deque() {
     return t ;
 }
 
+bool isEmpty(TransactionDeque t){
+    return t->size == 0;
+}
+
 /****************************************************/
 
 
@@ -80,6 +86,7 @@ void add_transaction_to_transactionDeque(TransactionDeque t){
 
 
 void remove_transaction(TransactionDeque t, int index) { 
+    assert(!isEmpty(t));
     Transaction itr = t->sentinel->next ;
     while (index--) 
         itr = itr->next ;
@@ -107,43 +114,61 @@ int get_nb_total_transactions(TransactionDeque t) {
     return t->size ;
 }
 
-void hash_Merkle_tree(TransactionDeque t, char hash[]){
+void hash_Merkle_tree(TransactionDeque t, char *hash){
  /*   (void)t ;
     hash = "" ;
     */
-    char temp[SHA256_BLOCK_SIZE*2 + 1];
+    assert(!isEmpty(t));
     int taille=t->size ;
+    Transaction itr ;
+    char c[2*(SHA256_BLOCK_SIZE*2 + 1)] ;
+    int cpt ;
 
-    if ( (taille)%2==1 ){
+    if ( taille%2==1 ){
         taille+=1 ;
     }
-    char * hashTab[] = malloc((taille/2)*sizeof(char)*(SHA256_BLOCK_SIZE*2 + 1)); // Stocke Nb_transactions/2 Hashs
+
+    char hashTab[taille/2+1][SHA256_BLOCK_SIZE*2 + 1] ; // Stocke Nb_transactions/2 Hashs
    
     // Si nombre impair, taille>t-size, permet de gérer le dédoublement du dernier hash
     if (taille>t->size){
-        hashTab[taille/2] = t[taille-1] ;
-        strcat(hashTab[taille/2], hashTab[taille/2]) ;
-        sha256ofString(hashTab[taille/2], hashTab[taille/2]) ;  
+        sprintf(c,"%s%s",t->sentinel->prev->srcDest,t->sentinel->prev->srcDest) ;
+        sha256ofString(c,hashTab[taille/2-1]) ;
+        itr = t->sentinel->prev->prev ;
+        //printf("Chaine : %s, Hash init : %s\n", c,hashTab[taille/2-1]);
     }
 
-    // Premiere itération en récupérant les hashs via la T_dqueue
-    taille=taille/2 ;
-    for(int i=taille-1; i>0; i--){
-        hashTab[i] = t[2*i] ;
-        strcat(hashTab[i], t[(2*i)+1]) ;
-        sha256ofString(hashTab[i], hashTab[i]) ;  
+    cpt = taille/2-2 ; // indice du prochain hash à stocker
+
+    if (!itr)
+        itr = t->sentinel->prev ;
+
+    // initialisation de hashTab
+    while (itr != t->sentinel && cpt >= 0) {
+        sprintf(c,"%s%s",itr->prev->srcDest,itr->srcDest) ;
+        sha256ofString(c,hashTab[cpt]) ;
+        cpt-- ;
+        itr = itr->prev->prev ;
+        //printf("Chaine : %s, Hash init : %s\n", c,hashTab[cpt+1]);
     }
 
-    // Itérations avec les hashs obtenus jusqu'a l'obtention d'un hash final
-    while (taille>1) {
-        taille=taille/2 ;
-        for(int i=0; i<taille-1; i++){
-            hashTab[i] = hashTab[2*i] ;
-            strcat(hashTab[i], hashTab[(2*i)+1]) ;
-            sha256ofString(hashTab[i], hashTab[i]) ;  
+    while (taille/2 > 1) {
+        //printf("Hash dans tableau : %s\n",hashTab[0]);
+        taille = taille/2 ;
+        cpt = 0 ;
+        if (taille%2==1) {
+            strcpy(hashTab[taille],hashTab[taille-1]) ;
+            taille++ ;
+        }
+        while (cpt*2 < taille){
+            sprintf(c,"%s%s",hashTab[cpt*2],hashTab[cpt*2+1]) ;
+            sha256ofString(c,hashTab[cpt]) ;
+            cpt++ ;
         }
     }
-    hash=hashTab[0];
+
+    strcpy(hash,hashTab[0]);
+    //printf("Hash tableau final : %s. Ce qu'on retourne : %s\n", hashTab[0],hash) ;
 } 
 
 void display_info(TransactionDeque t){
@@ -151,7 +176,7 @@ void display_info(TransactionDeque t){
         printf(" Transaction: %s\n Index: %d\n Hash: %s\n",itr->srcDest,get_index(itr),itr->hash) ;
     }
 }
-/*
+
 int main(int argc,char *argv[]) {
     srand(time(NULL)) ;
     TransactionDeque t = init_transaction_deque() ;
@@ -160,8 +185,10 @@ int main(int argc,char *argv[]) {
     for(Transaction itr = t->sentinel->next;itr != t->sentinel;itr=itr->next){
         printf(" Transaction: %s\n Index: %d\n Hash: %s\n",itr->srcDest,get_index(itr),itr->hash) ;
     }
+    char h[SHA256_BLOCK_SIZE*2+1] ;
+    hash_Merkle_tree(t,h);
+    printf(" Hash du tree : %s\n",h);
     delete_transaction_deque(t) ;
     return 0 ;
 
 }
-*/
