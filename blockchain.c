@@ -77,13 +77,30 @@ Block get_block(Blockchain blockchain, int indexBlock) {
 /*----------------------------------------------------------------*/
 
 void rebuild_Blockchain(Blockchain blockchain, int indexBlock) {
+	Block itr = blockchain->sentinel->next ;
+	while (indexBlock--) 
+		itr = itr->next ;
+	Block cur = itr->next ; // pointeur sur le blcok dont on va recalculer le hash
+	itr->next->prev = itr->prev ; // suppression du block itr
+	itr->prev->next = itr->next ;
+	remove_block(itr) ;
+	blockchain->nbBlocks-- ;
+
+	strcat(cur->hashPrev,get_hash(cur->prev)) ; // on récupère le hash du previous
+	while (cur->next != blockchain->sentinel) {
+		minage(cur,blockchain->difficulty) ;
+		cur = cur->next ;
+	}
+
+
+	/* ANCIENNE VERSION 
 	Block b ;
 	for(; indexBlock<blockchain->nbBlocks; indexBlock++){
 		b=get_block(blockchain,indexBlock) ; 				// Récupère le block courant
 		// HashBlock : fonction existante qui calcule le hash
 		// set_hash_block(Block 1, Hash 2) : modifie le hash du block 1, par le hash 2
 		calcul_hash_block(b) ; 			// Fonction de block qui permet d'enregistrer un nouveau hash 	
-	}
+	} */
 }
 
 /*----------------------------------------------------------------*/

@@ -3,28 +3,33 @@
 #include<assert.h>
 #include<time.h>
 #include<stdbool.h>
+#include<string.h>
 
 #include "block.h"
 
 void calcul_hash_block(Block block) {
-	sprintf(block->hashCour, "%s%d", block->hashCour, block->index);
-	sprintf(block->hashCour,"%s%s",block->hashCour,block->timeStamp);
-	sprintf(block->hashCour,"%s%s",block->hashCour,block->hashPrev);
-	sprintf(block->hashCour,"%s%d",block->hashCour,block->nbTransaction);
-	sprintf(block->hashCour,"%s%s",block->hashCour,block->hashTreeRoot);
-	sprintf(block->hashCour, "%s%d",block->hashCour, block->nonce);
+	char str[512] ;
+	//printf("debut calcul_hash_block-->%ld\n",block->nonce );
+	sprintf(str, "%s%d", "", block->index);
+	//printf("\n %s 1\n",str);
+	sprintf(str,"%s%s",str,block->timeStamp);
+	//printf("\n%s 2\n",str);
+	sprintf(str,"%s%s",str,block->hashPrev);
+	//printf("\n%s 3\n",str);
+	sprintf(str,"%s%d",str,block->nbTransaction);
+	//printf("\n%s 4\n",str);
+	sprintf(str,"%s%s",str,block->hashTreeRoot);
+	//printf("\n%s 5\n",str);
+	sprintf(str,"%s%d",str, block->nonce);
+	//printf("\n%s 6\n",str);
+	//printf("\n index: %d, timeStamp: %s, hasprev: %s, nbTransaction: %d, hashTreeRoot: %s, nonce: %ld \n",block->index,
+	//	block->timeStamp,block->hashPrev,block->nbTransaction,block->hashTreeRoot,block->nonce);
+
+
+	sha256ofString(str,block->hashCour);
 }
 
 Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA256_BLOCK_SIZE*2 + 1]){
-		
-	/* Décision du tribunal en attente : on est censé avor la liste de transactions 
-	On prend la liste en paramètre, et on calcule l'arbre ici, ou on donne l'arbre et on 
-	se débrouille pour récupérer la liste des transaction ? Ou la liste sera faite en arbre et 
-	pas en queue ? ... Opinion personnel : On donne la queue (listeTransactions), et pas un 
-	transactionTree, le sujet me semble plus tendre vers cette solution. 
-	Dans ce cas ==> Transformation de notre TAD transactionTree en transactionList et ajout de 
-	la méthode qui en fait un Arbre ? Puis modification des lignes de codes qui le nécessitent.
-	*/
 
 	// Initialiser les valeurs du block
 	Block block = malloc(sizeof(struct s_block)) ;
@@ -36,30 +41,7 @@ Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA2
 	hash_Merkle_tree(transactions,block->hashTreeRoot) ;
 	block->nonce = 0 ;
 	calcul_hash_block(block) ;
-	//allué dans la strcucture block->hashCour = malloc ( (SHA256_BLOCK_SIZE*2+1)*sizeof(char) ) ; // SHA256_BLOCK_SIZE est déclaré dans sha256.h
-
-	/*
-	// Fonction minage début
-	// Calculer le hashCour
-	// Le contenu du block mis dans une chaine de caractère pour utiliser la fonction de hashage
-	//BYTE * tempLine =  Transformer le contenu du block en BYTE  Je vois pas comment faire	 ; // BYTE Défini dans sha256.h
-
-	// Void qui prend le premier char * en parametre et renvoit le hash dans le second char * en parametre 
-	sha256ofString(tempLine,block->hashCour); 
-
-	// Modifier les valeurs de la nonce et du hashCour jusqu'a respect des critères de sécurité (4*0 au début du hash)
-	while !( ((block->hashCour[0])==0) && ((block->hashCour[1])==0) && 
-			((block->hashCour[2])==0) && ((block->hashCour[4])==0) ) {
-		tempLine = // Fonction qui transforme le block en BYTE  ;
-		sha256ofString(tempLine,block->hashCour) ; 
-		++(block->nonce) ;
-	}
-
-	// Fonction minage Fin ;
-	*/
-
 	return block ;
-	
 }
 
 
@@ -68,30 +50,30 @@ Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA2
 
 //On peut créer une fonction "Minage" et qu'on peut appliquer dans le create et dans set_HashPrev qui fait :
 void minage(Block block, int difficulty){ 
-	BYTE * tempLine = "";
+	//BYTE * tempLine ;
+	//printf("start minage\n");
+	//printf("nonce = %d\n",block->nonce );
 	int i=0;
+	//printf("start 1er calcul_hash_block\n");
 	calcul_hash_block(block);
 	while (i<difficulty){
-		if (block->hashCour[i] != 0){
-			calcul_hash_block(block);
-			sha256ofString(tempLine,block->hashCour);
+		if (block->hashCour[i] != '0'){
+			//printf("recalcule\n");
 			++(block->nonce);
+			//printf("calcul_hash_block:\n");
+			calcul_hash_block(block);
+			//printf("end calcul_hash_block, nonce = %d\n",block->nonce);
+			//printf("%s\n",block->hashCour);
+			//printf("premier car du hash:%c ",block->hashCour[0]);
+			//sha256ofString(tempLine,block->hashCour);
 			i=0;
 		}
-		else{
+		else
 			++i;
-		}
 	}
+	printf("fin Minage\n");
 }
-/*
-// Celui ci sert a changer le hashPrev du précédent block (s'il disparait de la chaine par exemple)
-// Ensuite il recalcule le hashCour via le void minage
-void set_hashPrev(Block block, char * newHashPrev){
-	assert(!empty(block)) ;	
-	block->hashPrev = newHashPrev ;
-	minage(block) ;
-}
-*/
+
 bool block_empty(Block block){
 	return (block->index == 0);
 }
@@ -110,16 +92,15 @@ TransactionDeque get_transaction(Block block){
 	assert(!block_empty(block));
 	return block->transactions;
 }
-
-/*     problème d'uniformité du type transactionTree?		*/ 
+ 
 
 void remove_block(Block block) {
 	delete_transaction_deque(block->transactions) ;
 	free(block);
 	block = NULL ;
 }
-
-/*void display_info_block(Block block) {
+/*
+void display_info_block(Block block) {
 	printf("Block info\n index: %d\n Transactions:\n",block->index) ;
 	display_info(block->transactions) ;
 	printf("timeStamp: %s\n hash precedent: %s\n",block->timeStamp,block->hashPrev);
@@ -131,12 +112,16 @@ void remove_block(Block block) {
 int main(void) {
 	srand(time(NULL)) ;
     TransactionDeque t = init_transaction_deque() ;
-    for (int i=0; i<5;i++) 
+    int i;
+    for (i=0; i<5;i++) 
         add_transaction_to_transactionDeque(t) ;
     Block b = create_block(t,0,"") ;
     display_info_block(b) ;
+    minage(b,4);
+    printf("toto\n");
+    display_info_block(b) ;
+    printf("start remove\n");
     remove_block(b) ;
-    delete_transaction_deque(t) ;
+    printf("fin remove\n");
 	return 0 ;
-}
-*/
+}*/

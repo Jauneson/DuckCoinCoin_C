@@ -177,7 +177,7 @@ void display_info(TransactionDeque t){
     }
 }
 
-int main(int argc,char *argv[]) {
+/*int main(int argc,char *argv[]) {
     srand(time(NULL)) ;
     TransactionDeque t = init_transaction_deque() ;
     for (int i=0; i<5;i++) 
@@ -191,4 +191,4 @@ int main(int argc,char *argv[]) {
     delete_transaction_deque(t) ;
     return 0 ;
 
-}
+} */

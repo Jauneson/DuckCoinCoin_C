@@ -21,6 +21,9 @@ typedef struct s_block {
 	struct s_block *prev ;
 	struct s_block *next ;
 }*Block ;
+
+
+void calcul_hash_block(Block block) ;
 /**
  * @brief initialize a block 
  * 
@@ -30,6 +33,8 @@ typedef struct s_block {
  * @return block (type s_block *)
  */
 Block create_block(TransactionDeque transaction,int idBlock, char *hash) ;
+
+void minage(Block block, int difficulty) ;
 /**
  * @return the current hash of a block
  * 
@@ -54,5 +59,6 @@ char * get_timeStamp(Block block) ;
  */
 TransactionDeque get_transaction(Block block) ;
 
-void calcul_hash_block(Block block) ;
+void remove_block(Block block) ;
+
 #endif
