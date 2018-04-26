@@ -40,7 +40,8 @@ Block create_block(TransactionDeque transactions,int idBlock, char hashPrev[SHA2
 	block->nbTransaction = get_nb_total_transactions(transactions) ;
 	hash_Merkle_tree(transactions,block->hashTreeRoot) ;
 	block->nonce = 0 ;
-	calcul_hash_block(block) ;
+	if (idBlock) // si pas génésis
+		calcul_hash_block(block) ;
 	return block ;
 }
 

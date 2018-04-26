@@ -6,7 +6,10 @@
 #include "blockchain.h"
 
 #define NB_MAX_TRANSACTIONS 10 
-
+#define GENESIS_MANQUANT 1 ;
+#define ERR_CHAINAGE_HASH 2 ;
+#define ERR_HASH 3 ;
+#define ERR_MERKLE_ROOT 4 ;
 
 struct s_blockchain {
 	int difficulty  ;
@@ -16,25 +19,25 @@ struct s_blockchain {
 
 /*----------------------------------------------------------------*/
 
-Blockchain create_blockchain() {
-	Blockchain blockchain = malloc(sizeof(struct s_blockchain)) ;
-	blockchain->sentinel = malloc(sizeof(struct s_block)) ;
-	blockchain->sentinel->next = blockchain->sentinel ;
-	blockchain->sentinel->prev = blockchain->sentinel ;
-	blockchain->nbBlocks = 0 ;
-	return blockchain ;
-}
-
-/*----------------------------------------------------------------*/
-
 void init_genesis(Blockchain blockchain) {
-	Block b = create_block(transaction_genesis(),0,0) ;
+	Block b = create_block(transaction_genesis(),0,"0") ;
 	b->next = blockchain->sentinel ;
 	b->prev = blockchain->sentinel ;
 	blockchain->sentinel->next = b ;
 	blockchain->sentinel->prev = b ;
-	(blockchain->nbBlocks)++ ;
 }
+
+/*----------------------------------------------------------------*/
+
+Blockchain create_blockchain(int dif) {
+	Blockchain blockchain = malloc(sizeof(struct s_blockchain)) ;
+	blockchain->sentinel = malloc(sizeof(struct s_block)) ;
+	init_genesis(blockchain) ;
+	blockchain->nbBlocks = 1 ;
+	blockchain->difficulty = dif ;
+	return blockchain ;
+}
+
 
 /*----------------------------------------------------------------*/
 
@@ -115,11 +118,40 @@ void delete_Blockchain (Blockchain blockchain){
 }
 
 
+/*-----------------------------VERIF-------------------------------*/
+
+int verif_hash_block(Block b) {
+	char *str ;
+	str = strcpy(str,b->hashCour) ;
+	calcul_hash_block(b) ;
+	return strcmp(str,b->hashCour) ;
+}
+
+int verification_1(Blockchain b) {
+	Block itr = b->sentinel->next ;
+	if (itr->hashCour[0]){
+		return GENESIS_MANQUANT ;
+	}
+	itr = itr->next ;
+	while (itr != b->sentinel) {
+		if (strcmp(itr->hashPrev,itr->prev->hashCour))
+			return ERR_CHAINAGE_HASH ;
+		if (verif_hash_block(itr))
+			return ERR_HASH ;
+		itr = itr->next ;
+	}
+	return 0 ;
+}
+
+int verification_2(Blockchain b) {
+	return 0 ;
+}
+
 /*-----------------------------------------------------------------*/
 
 
 //---------TESTS----------
-
+/*
 void display_info_block(Block block) {
 	printf("Block info\n index: %d\n Transactions:\n",block->index) ;
 	printf("timeStamp: %s\n hash precedent: %s\n",block->timeStamp,block->hashPrev);
@@ -143,7 +175,7 @@ int main(void) {
     }
     
     printf("Création blockchain : \n");
-    Blockchain bc = create_blockchain() ;
+    Blockchain bc = create_blockchain(3) ;
    
     printf("Initialisation du genesis : \n");
     init_genesis(bc) ;
@@ -162,3 +194,4 @@ int main(void) {
     printf("Done.\n");
 	return 0 ;
 }
+*/

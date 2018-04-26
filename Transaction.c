@@ -41,7 +41,7 @@ struct s_transactionDeque {
 TransactionDeque transaction_genesis() {
    TransactionDeque t = malloc(sizeof(struct s_transactionDeque)) ;
    t->sentinel = malloc(sizeof(struct s_transaction)) ;
-   sprintf(t->sentinel->srcDest,"genesis") ;
+   sprintf(t->sentinel->srcDest,"Genesis") ;
    t->sentinel->index = 0 ;
    t->size = 0 ; 
    return t;
